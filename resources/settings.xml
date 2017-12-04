@@ -1,0 +1,5 @@
+<settings>
+    <category label="32000">
+        <setting id="per_page" label="32001" type="slider" default="20" range="5,5,100" option="int"/>
+    </category>
+</settings>

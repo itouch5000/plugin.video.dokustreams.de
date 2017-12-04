@@ -1,0 +1,92 @@
+# Kodi Media Center language file
+msgid ""
+msgstr ""
+
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: en\n"
+
+
+msgctxt "#32000"
+msgid "General"
+msgstr "Allgemein"
+
+msgctxt "#32001"
+msgid "Per page"
+msgstr "Pro Seite"
+
+msgctxt "#32002"
+msgid "Next page"
+msgstr "Nächste Seite"
+
+msgctxt "#32003"
+msgid "Add to Bookmarks"
+msgstr "Zur Merkliste hinzufügen"
+
+msgctxt "#32004"
+msgid "Show tags"
+msgstr "Schlagwörter anzeigen"
+
+msgctxt "#30005"
+msgid "Show categories"
+msgstr "Kategorien anzeigen"
+
+msgctxt "#30006"
+msgid "Documentations"
+msgstr "Dokumentationen"
+
+msgctxt "#30007"
+msgid "Tags"
+msgstr "Schlagwörter"
+
+msgctxt "#30008"
+msgid "Categories"
+msgstr "Kategorien"
+
+msgctxt "#30009"
+msgid "Playlist"
+msgstr "Wiedergabeliste"
+
+msgctxt "#30010"
+msgid "Video"
+msgstr "Video"
+
+msgctxt "#30011"
+msgid "Search"
+msgstr "Suche"
+
+msgctxt "#30012"
+msgid "Bookmarks"
+msgstr "Merkliste"
+
+msgctxt "#30013"
+msgid "Select mirror for"
+msgstr "Mirror auswählen für"
+
+msgctxt "#30014"
+msgid "Search documentations"
+msgstr "Dokumentationen suchen"
+
+msgctxt "#30015"
+msgid "Remove from Bookmarks"
+msgstr "Von Merkliste entfernen"
+
+msgctxt "#30016"
+msgid "Error"
+msgstr "Fehler"
+
+msgctxt "#30017"
+msgid "Documentation already in Bookmarks"
+msgstr "Doku wurde bereits zur Merkliste hinzufügt"
+
+msgctxt "#30018"
+msgid "Search tags"
+msgstr "Schlagwörter suchen"
+
+msgctxt "#30019"
+msgid "Search categories"
+msgstr "Kategorien suchen"
+
+msgctxt "#30020"
+msgid "Short documentations"
+msgstr "Kurzdokumentationen"
