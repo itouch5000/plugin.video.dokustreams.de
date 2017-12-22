@@ -249,7 +249,7 @@ def list_categories(url):
         next_url = edit_url(url, {'page': next_page})
         listing.append({
             'label': '[COLOR blue]{0}[/COLOR]'.format(_("Next page")),
-            'url': plugin.get_url(action='tags_by_url', url=next_url),
+            'url': plugin.get_url(action='categories_by_url', url=next_url),
         })
     return listing
 
