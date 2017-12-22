@@ -216,7 +216,7 @@ def list_tags(url):
     json_data = requests.get(url).json()
     listing = []
     for i in json_data:
-        name = i.get('name')
+        name = HTMLParser().unescape(i.get('name'))
         tag_id = i.get('id')
         listing.append({
             'label': name,
@@ -237,7 +237,7 @@ def list_categories(url):
     json_data = requests.get(url).json()
     listing = []
     for i in json_data:
-        name = i.get('name')
+        name = HTMLParser().unescape(i.get('name'))
         category_id = i.get('id')
         listing.append({
             'label': name,
