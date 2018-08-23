@@ -108,7 +108,7 @@ def parse_ids_content(content):
             yt_pid = i['id'][4:]
             yt_pimg = soup.find('div', {'id': 'lyte_{0}'.format(yt_pid)})['data-src']
             yt_pimg = urllib.unquote(yt_pimg)
-            yt_vid = re.findall('/([^\"&?\/\ ]{11})/hqdefault\.', yt_pimg)[0]
+            yt_vid = re.findall('/vi/([^\"&?\/\ ]{11})/', yt_pimg)[0]
             yt_playlists.append((yt_pid, yt_vid))  # contains tuple with (id, image_id)
         else:
             yt_vid = i['id'][4:]
