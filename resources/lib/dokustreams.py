@@ -38,7 +38,7 @@ def page_from_url(url):
     return page
 
 
-def list_videos(url, enable_bookmark=True):
+def list_videos(url):
     json_data = requests.get(url).json()
     listing = []
     for i in json_data:
@@ -56,11 +56,6 @@ def list_videos(url, enable_bookmark=True):
             plot = ""
         yt_playlists, yt_videos = parse_ids_content(content)
         context_menu = []
-        if enable_bookmark:
-            context_menu.append(
-                (Language.add_to_bookmarks,
-                 'XBMC.RunPlugin({0})'.format(plugin.get_url(action='add_bookmark', id=_id))),
-            )
         context_menu += [
             (Language.show_tags,
              'XBMC.Container.Update({0})'.format(plugin.get_url(action='tags_by_post', id=_id))),
@@ -279,12 +274,6 @@ def root(params):
         xbmcgui.ListItem(Language.search_categories),
         isFolder=True
     )
-    xbmcplugin.addDirectoryItem(
-        plugin.handle,
-        plugin.get_url(action='bookmarks'),
-        xbmcgui.ListItem(Language.bookmarks),
-        isFolder=True
-    )
     xbmcplugin.endOfDirectory(plugin.handle)
 
 
@@ -357,27 +346,6 @@ def search_categories(params):
         return list_categories(url)
 
 
-def bookmarks(params):
-    with plugin.get_storage() as storage:
-        if not 'bookmarks' in storage:
-            storage['bookmarks'] = []
-        ids = storage['bookmarks']
-    if not ids:
-        return list()
-    ids = ','.join(ids)
-    url = build_url('posts', {'include': ids})
-    listing = list_videos(url, enable_bookmark=False)
-    for index, item in enumerate(listing):  # add remove from bookmarks to first position
-        old_context = item['context_menu'] if 'context_menu' in item else list()
-        item['context_menu'] = list()
-        item['context_menu'].append(
-            (Language.remove_from_bookmarks,
-             'XBMC.RunPlugin({0})'.format(plugin.get_url(action='remove_bookmark', index=index))),
-        )
-        item['context_menu'] += old_context
-    return listing
-
-
 def posts_by_url(params):
     url = params.url
     return list_videos(url)
@@ -415,23 +383,6 @@ def categories_by_post(params):
     post_id = params.id
     url = build_url('categories', {'post': post_id})
     return list_categories(url)
-
-
-def add_bookmark(params):
-    _id = params.id
-    with plugin.get_storage() as storage:
-        if not 'bookmarks' in storage:
-            storage['bookmarks'] = []
-        if _id in storage['bookmarks']:
-            xbmcgui.Dialog().notification(Language.error, Language.documentation_already_in_bookmarks)
-        else:
-            storage['bookmarks'].append(_id)
-
-
-def remove_bookmark(params):
-    with plugin.get_storage() as storage:
-        storage['bookmarks'].pop(int(params.index))
-    xbmc.executebuiltin('Container.Refresh')
 
 
 def play(params):

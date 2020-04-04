@@ -39,8 +39,6 @@ def run():
         dokustreams.search_tags(params)
     if action == "search_categories":
         dokustreams.search_categories(params)
-    if action == "bookmarks":
-        dokustreams.bookmarks(params)
     if action == "posts_by_url":
         dokustreams.posts_by_url(params)
     if action == "tags_by_url":
@@ -55,10 +53,6 @@ def run():
         dokustreams.tags_by_post(params)
     if action == "categories_by_post":
         dokustreams.categories_by_post(params)
-    if action == "add_bookmark":
-        dokustreams.add_bookmark(params)
-    if action == "remove_bookmark":
-        dokustreams.remove_bookmark(params)
     if action == "play":
         dokustreams.play(params)
     else:
