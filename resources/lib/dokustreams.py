@@ -32,7 +32,7 @@ from resources.lib.selectdialog import DialogSelect
 
 
 BASE_URL = 'http://dokustreams.de/wp-json/wp/v2'
-PER_PAGE = int(get_setting('per_page'))
+PER_PAGE = get_setting('per_page', int)
 
 
 def page_from_url(url):
