@@ -1,12 +1,13 @@
-import re
-import bs4
 import json
+import re
+
+import bs4
 import requests
 
 try:
     # python 3
     from urllib.parse import urlencode, parse_qsl, urlsplit, unquote, quote_plus
-except ModuleNotFoundError:
+except ImportError:
     # python 2
     from urlparse import parse_qsl, urlsplit
     from urllib import urlencode, unquote, quote_plus
@@ -14,7 +15,7 @@ except ModuleNotFoundError:
 try:
     # python 3
     from html import unescape
-except ModuleNotFoundError:
+except ImportError:
     # python 2
     from HTMLParser import HTMLParser
     unescape = HTMLParser().unescape
@@ -26,6 +27,8 @@ import xbmcplugin
 from resources.lib import plugin
 from resources.lib.language import Language
 from resources.lib.settings import get_setting
+from resources.lib.utils import py2_encode, py2_decode
+from resources.lib.selectdialog import DialogSelect
 
 
 BASE_URL = 'http://dokustreams.de/wp-json/wp/v2'
@@ -40,12 +43,11 @@ def page_from_url(url):
 
 def list_videos(url):
     json_data = requests.get(url).json()
-    listing = []
+
     for i in json_data:
         _id = i.get('id')
-        title = HTMLParser().unescape(i.get('title')['rendered'])
-        if type(title) == unicode:
-            title = title.encode('utf-8')
+        title = unescape(i.get('title')['rendered'])
+        title = py2_encode(title)
         content = i.get('content')['rendered']
         date = i.get('date')[:10]
         slug = i.get('slug')
@@ -55,119 +57,149 @@ def list_videos(url):
         except TypeError:
             plot = ""
         yt_playlists, yt_videos = parse_ids_content(content)
-        context_menu = []
-        context_menu += [
-            (Language.show_tags,
-             'XBMC.Container.Update({0})'.format(plugin.get_url(action='tags_by_post', id=_id))),
-            (Language.show_categories,
-             'XBMC.Container.Update({0})'.format(plugin.get_url(action='categories_by_post', id=_id))),
-        ]
+
+        li = xbmcgui.ListItem(title)
+        li.setInfo("video", {
+            "title": title,
+            "plot": plot,
+            "aired": date,
+            "year": date[:4]
+        })
+        li.addContextMenuItems([
+            (
+                Language.show_tags,
+                'XBMC.Container.Update({0})'.format(plugin.get_url(action='tags_by_post', id=_id))
+            ),
+            (
+                Language.show_categories,
+                'XBMC.Container.Update({0})'.format(plugin.get_url(action='categories_by_post', id=_id))
+            ),
+        ])
+
         if len(yt_videos) == 0 and len(yt_playlists) == 0:  # search for mirror
             image = "http://dokustreams.de/wp-content/uploads/{0}.jpg".format(slug)
-            listing.append({
-                'label': title,
-                'thumb': image,
-                'info': {'video': {
-                    'title': title,
-                    'plot': plot,
-                    'aired': date,
-                    'year': date[:4],
-                }},
-                'context_menu': context_menu,
-                'is_playable': True,
-                'url': plugin.get_url(action='play', name=title),
+
+            li.setArt({
+                'thumb': image
             })
+            li.setProperty("isPlayable", "true")
+            xbmcplugin.addDirectoryItem(
+                plugin.handle,
+                plugin.get_url(action="play", name=title),
+                li,
+                isFolder=False
+            )
         elif len(yt_videos) == 1 and len(yt_playlists) == 0:  # video direkt starten
             yt_vid = yt_videos[0]
             image = "https://i.ytimg.com/vi/{0}/hqdefault.jpg".format(yt_vid)
-            listing.append({
-                'label': title,
-                'thumb': image,
-                'info': {'video': {
-                    'title': title,
-                    'plot': plot,
-                    'aired': date,
-                    'year': date[:4],
-                }},
-                'context_menu': context_menu,
-                'is_playable': True,
-                'url': plugin.get_url(action='play', youtube_id=yt_vid, name=title),
+
+            li.setArt({
+                'thumb': image
             })
+            li.setProperty("isPlayable", "true")
+            xbmcplugin.addDirectoryItem(
+                plugin.handle,
+                plugin.get_url(action="play", youtube_id=yt_vid, name=title),
+                li,
+                isFolder=False
+            )
         elif len(yt_videos) == 0 and len(yt_playlists) == 1:  # playlist direkt anzeigen
             yt_pid, yt_vid = yt_playlists[0]
             image = "https://i.ytimg.com/vi/{0}/hqdefault.jpg".format(yt_vid)
-            listing.append({
-                'label': title,
-                'thumb': image,
-                'info': {'video': {
-                    'title': title,
-                    'plot': plot,
-                    'aired': date,
-                    'year': date[:4],
-                }},
-                'context_menu': context_menu,
-                'is_playable': False,
-                'url': "plugin://plugin.video.youtube/playlist/{0}/".format(yt_pid),
+
+            li.setArt({
+                'thumb': image
             })
+            li.setProperty("isPlayable", "false")
+            xbmcplugin.addDirectoryItem(
+                plugin.handle,
+                "plugin://plugin.video.youtube/playlist/{0}/".format(yt_pid),
+                li,
+                isFolder=True
+            )
         else:  # playlist und videos zusammen anzeigen
             image = "http://dokustreams.de/wp-content/uploads/{0}.jpg".format(slug)
-            listing.append({
-                'label': title,
-                'thumb': image,
-                'context_menu': context_menu,
-                'is_playable': False,
-                'url': plugin.get_url(action='multiple_videos_playlists', id=_id, name=title),
+
+            li.setArt({
+                'thumb': image
             })
+            li.setProperty("isPlayable", "false")
+            xbmcplugin.addDirectoryItem(
+                plugin.handle,
+                plugin.get_url(action='multiple_videos_playlists', id=_id, name=title),
+                li,
+                isFolder=True
+            )
+
     if len(json_data) == PER_PAGE:
         next_page = page_from_url(url) + 1
         next_url = edit_url(url, {'page': next_page})
-        listing.append({
-            'label': '[COLOR blue]{0}[/COLOR]'.format(Language.next_page),
-            'url': plugin.get_url(action='posts_by_url', url=next_url),
-        })
-    return listing
+        li = xbmcgui.ListItem('[COLOR blue]{0}[/COLOR]'.format(Language.next_page))
+        xbmcplugin.addDirectoryItem(
+            plugin.handle,
+            plugin.get_url(action='posts_by_url', url=next_url),
+            li,
+            isFolder=True
+        )
+    xbmcplugin.endOfDirectory(plugin.handle, cacheToDisc=True)
 
 
 def list_tags(url):
     json_data = requests.get(url).json()
-    listing = []
     for i in json_data:
-        name = HTMLParser().unescape(i.get('name'))
+        name = unescape(i.get('name'))
         tag_id = i.get('id')
-        listing.append({
-            'label': name,
-            'is_playable': False,
-            'url': plugin.get_url(action='posts_by_tag', id=tag_id),
-        })
+
+        li = xbmcgui.ListItem(name)
+        li.setProperty("isPlayable", "false")
+        xbmcplugin.addDirectoryItem(
+            plugin.handle,
+            plugin.get_url(action='posts_by_tag', id=tag_id),
+            li,
+            isFolder=True
+        )
     if len(json_data) == PER_PAGE:
         next_page = page_from_url(url) + 1
         next_url = edit_url(url, {'page': next_page})
-        listing.append({
-            'label': '[COLOR blue]{0}[/COLOR]'.format(Language.next_page),
-            'url': plugin.get_url(action='tags_by_url', url=next_url),
-        })
-    return listing
+
+        li = xbmcgui.ListItem('[COLOR blue]{0}[/COLOR]'.format(Language.next_page))
+        li.setProperty("isPlayable", "false")
+        xbmcplugin.addDirectoryItem(
+            plugin.handle,
+            plugin.get_url(action='tags_by_url', url=next_url),
+            li,
+            isFolder=True
+        )
+    xbmcplugin.endOfDirectory(plugin.handle, cacheToDisc=True)
 
 
 def list_categories(url):
     json_data = requests.get(url).json()
-    listing = []
     for i in json_data:
-        name = HTMLParser().unescape(i.get('name'))
+        name = unescape(i.get('name'))
         category_id = i.get('id')
-        listing.append({
-            'label': name,
-            'is_playable': False,
-            'url': plugin.get_url(action='posts_by_category', id=category_id),
-        })
+
+        li = xbmcgui.ListItem(name)
+        li.setProperty("isPlayable", "false")
+        xbmcplugin.addDirectoryItem(
+            plugin.handle,
+            plugin.get_url(action='posts_by_category', id=category_id),
+            li,
+            isFolder=True
+        )
     if len(json_data) == PER_PAGE:
         next_page = page_from_url(url) + 1
         next_url = edit_url(url, {'page': next_page})
-        listing.append({
-            'label': '[COLOR blue]{0}[/COLOR]'.format(Language.next_page),
-            'url': plugin.get_url(action='categories_by_url', url=next_url),
-        })
-    return listing
+
+        li = xbmcgui.ListItem('[COLOR blue]{0}[/COLOR]'.format(Language.next_page))
+        li.setProperty("isPlayable", "false")
+        xbmcplugin.addDirectoryItem(
+            plugin.handle,
+            plugin.get_url(action='categories_by_url', url=next_url),
+            li,
+            isFolder=True
+        )
+    xbmcplugin.endOfDirectory(plugin.handle, cacheToDisc=True)
 
 
 def youtube_search(query):
@@ -223,7 +255,7 @@ def parse_ids_content(content):
             yt_pid = i['id'][4:]
             yt_pimg = soup.find('div', {'id': 'lyte_{0}'.format(yt_pid)})['data-src']
             yt_pimg = unquote(yt_pimg)
-            yt_vid = re.findall('/vi/([^\"&?\/\ ]{11})/', yt_pimg)[0]
+            yt_vid = re.findall(r"/vi/([^\"&?/ ]{11})/", yt_pimg)[0]
             yt_playlists.append((yt_pid, yt_vid))  # contains tuple with (id, image_id)
         else:
             yt_vid = i['id'][4:]
@@ -279,117 +311,135 @@ def root(params):
 
 def all_posts(params):
     url = build_url('posts')
-    return list_videos(url)
+    list_videos(url)
 
 
 def multiple_videos_playlists(params):
-    _id = params.id
-    title = HTMLParser().unescape(params.name)
-    if type(title) == unicode:
-        title = title.encode('utf-8')
+    _id = params.get("id")
+    title = unescape(params.get("name"))
+    title = py2_encode(title)
     url = build_url('posts', {'include': _id})
     i = requests.get(url).json()[0]
     content = i.get('content')['rendered']
     yt_playlists, yt_videos = parse_ids_content(content)
-    listing = []
     for index, playlist in enumerate(yt_playlists):
         yt_pid, yt_vid = playlist
         image = "https://i.ytimg.com/vi/{0}/hqdefault.jpg".format(yt_vid)
-        listing.append({
-            'label': "{0} {1}".format(Language.playlist, index + 1),
-            'thumb': image,
-            'is_playable': False,
-            'url': "plugin://plugin.video.youtube/playlist/{0}/".format(yt_pid),
+
+        li = xbmcgui.ListItem("{0} {1}".format(Language.playlist, index + 1))
+        li.setProperty("isPlayable", "false")
+        li.setArt({
+            'thumb': image
         })
+        xbmcplugin.addDirectoryItem(
+            plugin.handle,
+            "plugin://plugin.video.youtube/playlist/{0}/".format(yt_pid),
+            li,
+            isFolder=True
+        )
     for index, yt_vid in enumerate(yt_videos):
         image = "https://i.ytimg.com/vi/{0}/hqdefault.jpg".format(yt_vid)
-        listing.append({
-            'label': "{0} {1}".format(Language.video, index + 1),
-            'thumb': image,
-            'is_playable': True,
-            'url': plugin.get_url(action='play', youtube_id=yt_vid, name=title),
+
+        li = xbmcgui.ListItem("{0} {1}".format(Language.video, index + 1))
+        li.setProperty("isPlayable", "true")
+        li.setArt({
+            'thumb': image
         })
-    return listing
+        xbmcplugin.addDirectoryItem(
+            plugin.handle,
+            plugin.get_url(action='play', youtube_id=yt_vid, name=title),
+            li,
+            isFolder=False
+        )
+    xbmcplugin.endOfDirectory(plugin.handle)
 
 
 def all_tags(params):
     url = build_url('tags')
-    return list_tags(url)
+    list_tags(url)
 
 
 def all_categories(params):
     url = build_url('categories')
-    return list_categories(url)
+    list_categories(url)
 
 
 def search_posts(params):
     dialog = xbmcgui.Dialog()
     query = dialog.input(Language.search_documentations)
-    if query:
-        url = build_url('posts', {'search': query})
-        return list_videos(url)
+    query = py2_decode(query)
+    if not query:
+        return
+    url = build_url('posts', {'search': query})
+    list_videos(url)
 
 
 def search_tags(params):
     dialog = xbmcgui.Dialog()
     query = dialog.input(Language.search_tags)
-    if query:
-        url = build_url('tags', {'search': query})
-        return list_tags(url)
+    query = py2_decode(query)
+    if not query:
+        return
+    url = build_url('tags', {'search': query})
+    list_tags(url)
 
 
 def search_categories(params):
     dialog = xbmcgui.Dialog()
     query = dialog.input(Language.search_categories)
-    if query:
-        url = build_url('categories', {'search': query})
-        return list_categories(url)
+    query = py2_decode(query)
+    if not query:
+        return
+    url = build_url('categories', {'search': query})
+    list_categories(url)
 
 
 def posts_by_url(params):
-    url = params.url
-    return list_videos(url)
+    url = params.get("url")
+    list_videos(url)
 
 
 def tags_by_url(params):
-    url = params.url
-    return list_tags(url)
+    url = params.get("url")
+    list_tags(url)
 
 
 def categories_by_url(params):
-    url = params.url
-    return list_categories(url)
+    url = params.get("url")
+    list_categories(url)
 
 
 def posts_by_tag(params):
-    _id = params.get('id')
+    _id = params.get("id")
     url = build_url('posts', {'tags': _id})
-    return list_videos(url)
+    list_videos(url)
 
 
 def posts_by_category(params):
-    _id = params.get('id')
+    _id = params.get("id")
     url = build_url('posts', {'categories': _id})
-    return list_videos(url)
+    list_videos(url)
 
 
 def tags_by_post(params):
-    post_id = params.id
-    url = build_url('tags', {'post': post_id})
-    return list_tags(url)
+    _id = params.get("id")
+    url = build_url('tags', {'post': _id})
+    list_tags(url)
 
 
 def categories_by_post(params):
-    post_id = params.id
-    url = build_url('categories', {'post': post_id})
-    return list_categories(url)
+    _id = params.get("id")
+    url = build_url('categories', {'post': _id})
+    list_categories(url)
 
 
 def play(params):
-    name = params.name
+    name = params.get("name")
     youtube_id = params.get('youtube_id')
 
-    if youtube_id and requests.head("http://www.youtube.com/oembed?url=http://www.youtube.com/watch?v={0}&format=json".format(youtube_id)).status_code == 200:
+    url = "http://www.youtube.com/oembed?url=http://www.youtube.com/watch?v={0}&format=json".format(youtube_id)
+    r = requests.head(url)
+    if youtube_id and r.status_code == 200:
         video_url = "plugin://plugin.video.youtube/play/?video_id={0}".format(youtube_id)
     else:
         results = []
@@ -411,4 +461,6 @@ def play(params):
         if not result:
             return
         video_url = result.getProperty("path")
-    return Plugin.resolve_url(play_item={'path': video_url})
+
+    li = xbmcgui.ListItem(path=video_url)
+    xbmcplugin.setResolvedUrl(plugin.handle, True, li)

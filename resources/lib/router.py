@@ -1,29 +1,38 @@
 import sys
+
 try:
     # python 3
-    import urllib.parse as urllib
-except ModuleNotFoundError:
+    from urllib.parse import parse_qs, unquote_plus, urlparse
+except ImportError:
     # python 2
-    import urllib
+    from urlparse import parse_qs, urlparse
+    from urllib import unquote_plus
 
 from resources.lib import dokustreams
+from resources.lib.logger import Logger
+
+
+logger = Logger(__name__)
 
 
 def get_params(url):
-    query_string = urllib.urlparse(url).query
-    params_multiple = urllib.parse_qs(query_string)
+    query_string = urlparse(url).query
+    params_multiple = parse_qs(query_string)
     params = {}
     for key, values in params_multiple.items():
         value = values[0]
-        value = urllib.unquote_plus(value)
+        value = unquote_plus(value)
         params[key] = value
     return params
 
 
 def run():
     url = sys.argv[2]
+    logger.debug("url: {0}".format(url))
     params = get_params(url)
-    action = params.get('action', '')
+    logger.debug("params: {0}".format(params))
+    action = params.get('action')
+    logger.debug("action: {0}".format(action))
 
     if action == "all_posts":
         dokustreams.all_posts(params)
