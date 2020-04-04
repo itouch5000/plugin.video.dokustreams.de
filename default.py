@@ -6,24 +6,20 @@ import urllib
 import urlparse
 import requests
 from HTMLParser import HTMLParser
-from resources.lib.simpleplugin import Plugin, Addon, ListContext
 
 import xbmc
 import xbmcgui
 
-
-ListContext.cache_to_disk = True
-plugin = Plugin()
-addon = Addon()
-_ = plugin.initialize_gettext()
+from resources.lib.language import Language
+from resources.lib.settings import get_setting
 
 
 BASE_URL = 'http://dokustreams.de/wp-json/wp/v2'
-PER_PAGE = plugin.get_setting('per_page')
+PER_PAGE = get_setting('per_page')
 
 
 class DialogSelect(xbmcgui.WindowXMLDialog):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
         xbmcgui.WindowXMLDialog.__init__(self)
         self.listing = kwargs.get("listing")
         self.title = kwargs.get("title")
@@ -136,16 +132,14 @@ def list_videos(url, enable_bookmark=True, ):
         context_menu = []
         if enable_bookmark:
             context_menu.append(
-                (_("Add to Bookmarks"),
+                (Language.add_to_bookmarks,
                  'XBMC.RunPlugin({0})'.format(plugin.get_url(action='add_bookmark', id=_id))),
             )
         context_menu += [
-            (_("Show tags"),
+            (Language.show_tags,
              'XBMC.Container.Update({0})'.format(plugin.get_url(action='tags_by_post', id=_id))),
-            (_("Show categories"),
+            (Language.show_categories,
              'XBMC.Container.Update({0})'.format(plugin.get_url(action='categories_by_post', id=_id))),
-            #(_("Force mirror search"),
-             #'XBMC.RunPlugin({0})'.format(plugin.get_url(action='force_mirror', name=title))),
         ]
         if len(yt_videos) == 0 and len(yt_playlists) == 0:  # search for mirror
             image = "http://dokustreams.de/wp-content/uploads/{0}.jpg".format(slug)
@@ -207,7 +201,7 @@ def list_videos(url, enable_bookmark=True, ):
         next_page = page_from_url(url) + 1
         next_url = edit_url(url, {'page': next_page})
         listing.append({
-            'label': '[COLOR blue]{0}[/COLOR]'.format(_("Next page")),
+            'label': '[COLOR blue]{0}[/COLOR]'.format(Language.next_page),
             'url': plugin.get_url(action='posts_by_url', url=next_url),
         })
     return listing
@@ -228,7 +222,7 @@ def list_tags(url):
         next_page = page_from_url(url) + 1
         next_url = edit_url(url, {'page': next_page})
         listing.append({
-            'label': '[COLOR blue]{0}[/COLOR]'.format(_("Next page")),
+            'label': '[COLOR blue]{0}[/COLOR]'.format(Language.next_page),
             'url': plugin.get_url(action='tags_by_url', url=next_url),
         })
     return listing
@@ -249,7 +243,7 @@ def list_categories(url):
         next_page = page_from_url(url) + 1
         next_url = edit_url(url, {'page': next_page})
         listing.append({
-            'label': '[COLOR blue]{0}[/COLOR]'.format(_("Next page")),
+            'label': '[COLOR blue]{0}[/COLOR]'.format(Language.next_page),
             'url': plugin.get_url(action='categories_by_url', url=next_url),
         })
     return listing
@@ -286,14 +280,14 @@ def youtube_search(query):
 @plugin.action()
 def root(params):
     return [
-        {'label': _("Documentations"), 'url': plugin.get_url(action='all_posts')},
-        {'label': _("Short documentations"), 'url': plugin.get_url(action='multiple_videos_playlists', id=15092, name='Kurzdokus und Reportagen')},
-        {'label': _("Tags"), 'url': plugin.get_url(action='all_tags')},
-        {'label': _("Categories"), 'url': plugin.get_url(action='all_categories')},
-        {'label': _("Search documentations"), 'url': plugin.get_url(action='search_posts')},
-        {'label': _("Search tags"), 'url': plugin.get_url(action='search_tags')},
-        {'label': _("Search categories"), 'url': plugin.get_url(action='search_categories')},
-        {'label': _("Bookmarks"), 'url': plugin.get_url(action='bookmarks')},
+        {'label': Language.documentations, 'url': plugin.get_url(action='all_posts')},
+        {'label': Language.short_documentations, 'url': plugin.get_url(action='multiple_videos_playlists', id=15092, name='Kurzdokus und Reportagen')},
+        {'label': Language.tags, 'url': plugin.get_url(action='all_tags')},
+        {'label': Language.categories, 'url': plugin.get_url(action='all_categories')},
+        {'label': Language.search_documentations, 'url': plugin.get_url(action='search_posts')},
+        {'label': Language.search_tags, 'url': plugin.get_url(action='search_tags')},
+        {'label': Language.search_categories, 'url': plugin.get_url(action='search_categories')},
+        {'label': Language.bookmarks, 'url': plugin.get_url(action='bookmarks')},
     ]
 
 
@@ -336,7 +330,7 @@ def all_categories(params):
 @plugin.action()
 def search_posts(params):
     dialog = xbmcgui.Dialog()
-    query = dialog.input(_("Search documentations"))
+    query = dialog.input(Language.search_documentations)
     if query:
         url = build_url('posts', {'search': query})
         return list_videos(url)
@@ -345,7 +339,7 @@ def search_posts(params):
 @plugin.action()
 def search_tags(params):
     dialog = xbmcgui.Dialog()
-    query = dialog.input(_("Search tags"))
+    query = dialog.input(Language.search_tags)
     if query:
         url = build_url('tags', {'search': query})
         return list_tags(url)
@@ -354,7 +348,7 @@ def search_tags(params):
 @plugin.action()
 def search_categories(params):
     dialog = xbmcgui.Dialog()
-    query = dialog.input(_("Search categories"))
+    query = dialog.input(Language.search_categories)
     if query:
         url = build_url('categories', {'search': query})
         return list_categories(url)
@@ -403,7 +397,7 @@ def multiple_videos_playlists(params):
         yt_pid, yt_vid = playlist
         image = "https://i.ytimg.com/vi/{0}/hqdefault.jpg".format(yt_vid)
         listing.append({
-            'label': "{0} {1}".format(_("Playlist"), index+1),
+            'label': "{0} {1}".format(Language.playlist, index+1),
             'thumb': image,
             'is_playable': False,
             'url': "plugin://plugin.video.youtube/playlist/{0}/".format(yt_pid),
@@ -411,7 +405,7 @@ def multiple_videos_playlists(params):
     for index, yt_vid in enumerate(yt_videos):
         image = "https://i.ytimg.com/vi/{0}/hqdefault.jpg".format(yt_vid)
         listing.append({
-            'label': "{0} {1}".format(_("Video"), index+1),
+            'label': "{0} {1}".format(Language.video, index+1),
             'thumb': image,
             'is_playable': True,
             'url': plugin.get_url(action='play', youtube_id=yt_vid, name=title),
@@ -434,7 +428,7 @@ def bookmarks(params):
         old_context = item['context_menu'] if 'context_menu' in item else list()
         item['context_menu'] = list()
         item['context_menu'].append(
-            (_("Remove from Bookmarks"),
+            (Language.remove_from_bookmarks,
              'XBMC.RunPlugin({0})'.format(plugin.get_url(action='remove_bookmark', index=index))),
         )
         item['context_menu'] += old_context
@@ -448,7 +442,7 @@ def add_bookmark(params):
         if not 'bookmarks' in storage:
             storage['bookmarks'] = []
         if _id in storage['bookmarks']:
-            xbmcgui.Dialog().notification(_("Error"), _("Documentation already in Bookmarks"))
+            xbmcgui.Dialog().notification(Language.error, Language.documentation_already_in_bookmarks)
         else:
             storage['bookmarks'].append(_id)
 
@@ -480,7 +474,7 @@ def play(params):
             listitem.setProperty("path", media["file"])
             results.append(listitem)
         xbmc.executebuiltin("dialog.Close(busydialog)")
-        title = "{0} \"{1}\"".format(_("Select mirror for"), name)
+        title = "{0} \"{1}\"".format(Language.select_mirror_for, name)
         dialog = DialogSelect("DialogSelect.xml", "", listing=results, title=title)
         dialog.doModal()
         result = dialog.result
@@ -488,34 +482,6 @@ def play(params):
             return
         video_url = result.getProperty("path")
     return Plugin.resolve_url(play_item={'path': video_url})
-
-
-"""
-@plugin.action()
-def force_mirror(params):
-    name = params.name
-
-    xbmc.executebuiltin("ActivateWindow(busydialog)")
-
-    results = []
-    for media in youtube_search(name):
-        label = media["label"]
-        label2 = media["plot"]
-        image = ""
-        if media.get('art'):
-            if media['art'].get('thumb'):
-                image = (media['art']['thumb'])
-        listitem = xbmcgui.ListItem(label=label, label2=label2, iconImage=image)
-        listitem.setProperty("path", media["file"])
-        results.append(listitem)
-
-    xbmc.executebuiltin("dialog.Close(busydialog)")
-    dialog = DialogSelect("DialogSelect.xml", "", listing=results)
-    dialog.doModal()
-    result = dialog.result
-    if result:
-        xbmc.executebuiltin('PlayMedia("%s")' % result.getProperty("path"))
-"""
 
 
 if __name__ == '__main__':
