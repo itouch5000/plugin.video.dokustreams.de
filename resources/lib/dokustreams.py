@@ -272,12 +272,6 @@ def root(params):
     )
     xbmcplugin.addDirectoryItem(
         plugin.handle,
-        plugin.get_url(action='multiple_videos_playlists', id=15092, name='Kurzdokus und Reportagen'),
-        xbmcgui.ListItem(Language.short_documentations),
-        isFolder=True
-    )
-    xbmcplugin.addDirectoryItem(
-        plugin.handle,
         plugin.get_url(action='all_tags'),
         xbmcgui.ListItem(Language.tags),
         isFolder=True

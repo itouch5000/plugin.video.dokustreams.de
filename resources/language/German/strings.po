@@ -70,7 +70,3 @@ msgstr "Schlagwörter suchen"
 msgctxt "#30019"
 msgid "Search categories"
 msgstr "Kategorien suchen"
-
-msgctxt "#30020"
-msgid "Short documentations"
-msgstr "Kurzdokumentationen"

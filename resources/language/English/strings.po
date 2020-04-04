@@ -70,7 +70,3 @@ msgstr ""
 msgctxt "#30019"
 msgid "Search categories"
 msgstr ""
-
-msgctxt "#30020"
-msgid "Short documentations"
-msgstr ""

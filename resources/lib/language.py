@@ -21,4 +21,3 @@ class Language(object):
     error = __addon__.getLocalizedString(30016)
     search_tags = __addon__.getLocalizedString(30018)
     search_categories = __addon__.getLocalizedString(30019)
-    short_documentations = __addon__.getLocalizedString(30020)
