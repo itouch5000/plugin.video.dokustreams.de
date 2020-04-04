@@ -6,8 +6,9 @@ class Logger(object):
         self.name = name
 
     def _log(self, msg, level):
-        formatted_msg = "{0}: {1}".format(self.name, msg)
-        xbmc.log(formatted_msg, level)
+        if self.name:
+            msg = "{0}: {1}".format(self.name, msg)
+        xbmc.log(msg, level)
 
     def debug(self, msg):
         """
