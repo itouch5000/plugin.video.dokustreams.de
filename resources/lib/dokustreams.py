@@ -1,10 +1,23 @@
 import re
 import bs4
 import json
-import urllib
-import urlparse
 import requests
-from HTMLParser import HTMLParser
+
+try:
+    # python 3
+    from urllib.parse import urlencode, parse_qsl, urlsplit, unquote, quote_plus
+except ModuleNotFoundError:
+    # python 2
+    from urlparse import parse_qsl, urlsplit
+    from urllib import urlencode, unquote, quote_plus
+
+try:
+    # python 3
+    from html import unescape
+except ModuleNotFoundError:
+    # python 2
+    from HTMLParser import HTMLParser
+    unescape = HTMLParser().unescape
 
 import xbmc
 import xbmcgui
@@ -20,7 +33,7 @@ PER_PAGE = get_setting('per_page')
 
 
 def page_from_url(url):
-    params = dict(urlparse.parse_qsl(urlparse.urlsplit(url).query))
+    params = dict(parse_qsl(urlsplit(url).query))
     page = int(params.get('page', 1))
     return page
 
@@ -163,19 +176,18 @@ def list_categories(url):
 
 
 def youtube_search(query):
-    FIELDS_BASE = ["dateadded", "file", "lastplayed", "plot", "title", "art", "playcount"]
-    FIELDS_FILE = FIELDS_BASE + ["streamdetails", "director", "resume", "runtime"]
-    FIELDS_FILES = FIELDS_FILE + [
-        "plotoutline", "sorttitle", "cast", "votes", "trailer", "year", "country", "studio",
-        "genre", "mpaa", "rating", "tagline", "writer", "originaltitle", "imdbnumber", "premiered", "episode",
-        "showtitle",
-        "firstaired", "watchedepisodes", "duration", "season"]
+    properties = [
+        "dateadded", "file", "lastplayed", "plot", "title", "art", "playcount", "streamdetails", "director", "resume",
+        "runtime", "plotoutline", "sorttitle", "cast", "votes", "trailer", "year", "country", "studio", "genre", "mpaa",
+        "rating", "tagline", "writer", "originaltitle", "imdbnumber", "premiered", "episode", "showtitle", "firstaired",
+        "watchedepisodes", "duration", "season"
+    ]
     data = {
         "jsonrpc": "2.0",
         "method": "Files.GetDirectory",
         "id": 1,
         "params": {
-            "properties": FIELDS_FILES,
+            "properties": properties,
             "directory": "plugin://plugin.video.youtube/kodion/search/query/?q={0}".format(query)
         }
     }
@@ -194,15 +206,15 @@ def build_url(path, params=None):
     if not params:
         params = dict()
     params.setdefault('per_page', PER_PAGE)
-    url = '{0}/{1}?{2}'.format(BASE_URL, path, urllib.urlencode(params))
+    url = '{0}/{1}?{2}'.format(BASE_URL, path, urlencode(params))
     return url
 
 
 def edit_url(url, new_params):
-    parsed = urlparse.urlsplit(url)
-    params = dict(urlparse.parse_qsl(urlparse.urlsplit(url).query))
+    parsed = urlsplit(url)
+    params = dict(parse_qsl(urlsplit(url).query))
     params.update(new_params)
-    new_url = '{0}://{1}{2}?{3}'.format(parsed.scheme, parsed.netloc, parsed.path, urllib.urlencode(params))
+    new_url = '{0}://{1}{2}?{3}'.format(parsed.scheme, parsed.netloc, parsed.path, urlencode(params))
     return new_url
 
 
@@ -215,7 +227,7 @@ def parse_ids_content(content):
         if 'playlist' in i['class']:
             yt_pid = i['id'][4:]
             yt_pimg = soup.find('div', {'id': 'lyte_{0}'.format(yt_pid)})['data-src']
-            yt_pimg = urllib.unquote(yt_pimg)
+            yt_pimg = unquote(yt_pimg)
             yt_vid = re.findall('/vi/([^\"&?\/\ ]{11})/', yt_pimg)[0]
             yt_playlists.append((yt_pid, yt_vid))  # contains tuple with (id, image_id)
         else:
@@ -430,7 +442,7 @@ def play(params):
         video_url = "plugin://plugin.video.youtube/play/?video_id={0}".format(youtube_id)
     else:
         results = []
-        for media in youtube_search(urllib.quote_plus(name)):
+        for media in youtube_search(quote_plus(name)):
             label = media["label"]
             label2 = media["plot"]
             image = ""

@@ -1,7 +1,9 @@
 import sys
 try:
+    # python 3
     import urllib.parse as urllib
 except ModuleNotFoundError:
+    # python 2
     import urllib
 
 from resources.lib import dokustreams
