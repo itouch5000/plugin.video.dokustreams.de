@@ -43,6 +43,18 @@ def page_from_url(url):
     return page
 
 
+def add_next_url(url, action):
+    next_page = page_from_url(url) + 1
+    next_url = edit_url(url, {'page': next_page})
+    li = xbmcgui.ListItem('[COLOR blue]{0}[/COLOR]'.format(Language.next_page))
+    xbmcplugin.addDirectoryItem(
+        plugin.handle,
+        plugin.get_url(action=action, url=next_url),
+        li,
+        isFolder=True
+    )
+
+
 def list_videos(url):
     json_data = requests.get(url).json()
 
@@ -105,7 +117,6 @@ def list_videos(url):
             li.setArt({
                 'thumb': image
             })
-            li.setProperty("isPlayable", "false")
             xbmcplugin.addDirectoryItem(
                 plugin.handle,
                 plugin.get_url(action=list_video_playlist, id=_id),
@@ -113,7 +124,6 @@ def list_videos(url):
                 isFolder=True
             )
         elif len(parser.playlists) > 0:  # old playlist type found
-            li.setProperty("isPlayable", "false")
             xbmcplugin.addDirectoryItem(
                 plugin.handle,
                 plugin.get_url(action=list_playlist, id=_id),
@@ -122,15 +132,7 @@ def list_videos(url):
             )
 
     if len(json_data) == PER_PAGE:
-        next_page = page_from_url(url) + 1
-        next_url = edit_url(url, {'page': next_page})
-        li = xbmcgui.ListItem('[COLOR blue]{0}[/COLOR]'.format(Language.next_page))
-        xbmcplugin.addDirectoryItem(
-            plugin.handle,
-            plugin.get_url(action=posts_by_url, url=next_url),
-            li,
-            isFolder=True
-        )
+        add_next_url(url, posts_by_url)
     xbmcplugin.endOfDirectory(plugin.handle, cacheToDisc=True)
 
 
@@ -141,7 +143,6 @@ def list_tags(url):
         tag_id = i.get('id')
 
         li = xbmcgui.ListItem(name)
-        li.setProperty("isPlayable", "false")
         xbmcplugin.addDirectoryItem(
             plugin.handle,
             plugin.get_url(action=posts_by_tag, id=tag_id),
@@ -149,17 +150,7 @@ def list_tags(url):
             isFolder=True
         )
     if len(json_data) == PER_PAGE:
-        next_page = page_from_url(url) + 1
-        next_url = edit_url(url, {'page': next_page})
-
-        li = xbmcgui.ListItem('[COLOR blue]{0}[/COLOR]'.format(Language.next_page))
-        li.setProperty("isPlayable", "false")
-        xbmcplugin.addDirectoryItem(
-            plugin.handle,
-            plugin.get_url(action=tags_by_url, url=next_url),
-            li,
-            isFolder=True
-        )
+        add_next_url(url, tags_by_url)
     xbmcplugin.endOfDirectory(plugin.handle, cacheToDisc=True)
 
 
@@ -170,7 +161,6 @@ def list_categories(url):
         category_id = i.get('id')
 
         li = xbmcgui.ListItem(name)
-        li.setProperty("isPlayable", "false")
         xbmcplugin.addDirectoryItem(
             plugin.handle,
             plugin.get_url(action=posts_by_category, id=category_id),
@@ -178,17 +168,7 @@ def list_categories(url):
             isFolder=True
         )
     if len(json_data) == PER_PAGE:
-        next_page = page_from_url(url) + 1
-        next_url = edit_url(url, {'page': next_page})
-
-        li = xbmcgui.ListItem('[COLOR blue]{0}[/COLOR]'.format(Language.next_page))
-        li.setProperty("isPlayable", "false")
-        xbmcplugin.addDirectoryItem(
-            plugin.handle,
-            plugin.get_url(action=categories_by_url, url=next_url),
-            li,
-            isFolder=True
-        )
+        add_next_url(url, categories_by_url)
     xbmcplugin.endOfDirectory(plugin.handle, cacheToDisc=True)
 
 
@@ -320,7 +300,6 @@ def list_playlist(params):
 
     for p in parser.playlists:
         li = xbmcgui.ListItem(p.title)
-        li.setProperty("isPlayable", "false")
         xbmcplugin.addDirectoryItem(
             plugin.handle,
             "plugin://plugin.video.youtube/playlist/{0}/".format(p.id),
