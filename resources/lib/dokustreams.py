@@ -69,11 +69,11 @@ def list_videos(url):
         li.addContextMenuItems([
             (
                 Language.show_tags,
-                'XBMC.Container.Update({0})'.format(plugin.get_url(action='tags_by_post', id=_id))
+                'XBMC.Container.Update({0})'.format(plugin.get_url(action=tags_by_post, id=_id))
             ),
             (
                 Language.show_categories,
-                'XBMC.Container.Update({0})'.format(plugin.get_url(action='categories_by_post', id=_id))
+                'XBMC.Container.Update({0})'.format(plugin.get_url(action=categories_by_post, id=_id))
             ),
         ])
 
@@ -81,7 +81,7 @@ def list_videos(url):
             li.setProperty("isPlayable", "true")
             xbmcplugin.addDirectoryItem(
                 plugin.handle,
-                plugin.get_url(action="play", name=title),
+                plugin.get_url(action=play, name=title),
                 li,
                 isFolder=False
             )
@@ -95,7 +95,7 @@ def list_videos(url):
             li.setProperty("isPlayable", "true")
             xbmcplugin.addDirectoryItem(
                 plugin.handle,
-                plugin.get_url(action="play", youtube_id=v.id, name=title),
+                plugin.get_url(action=play, youtube_id=v.id, name=title),
                 li,
                 isFolder=False
             )
@@ -108,7 +108,7 @@ def list_videos(url):
             li.setProperty("isPlayable", "false")
             xbmcplugin.addDirectoryItem(
                 plugin.handle,
-                plugin.get_url(action="list_video_playlist", id=_id),
+                plugin.get_url(action=list_video_playlist, id=_id),
                 li,
                 isFolder=True
             )
@@ -116,7 +116,7 @@ def list_videos(url):
             li.setProperty("isPlayable", "false")
             xbmcplugin.addDirectoryItem(
                 plugin.handle,
-                plugin.get_url(action="list_playlist", id=_id),
+                plugin.get_url(action=list_playlist, id=_id),
                 li,
                 isFolder=True
             )
@@ -127,7 +127,7 @@ def list_videos(url):
         li = xbmcgui.ListItem('[COLOR blue]{0}[/COLOR]'.format(Language.next_page))
         xbmcplugin.addDirectoryItem(
             plugin.handle,
-            plugin.get_url(action='posts_by_url', url=next_url),
+            plugin.get_url(action=posts_by_url, url=next_url),
             li,
             isFolder=True
         )
@@ -144,7 +144,7 @@ def list_tags(url):
         li.setProperty("isPlayable", "false")
         xbmcplugin.addDirectoryItem(
             plugin.handle,
-            plugin.get_url(action='posts_by_tag', id=tag_id),
+            plugin.get_url(action=posts_by_tag, id=tag_id),
             li,
             isFolder=True
         )
@@ -156,7 +156,7 @@ def list_tags(url):
         li.setProperty("isPlayable", "false")
         xbmcplugin.addDirectoryItem(
             plugin.handle,
-            plugin.get_url(action='tags_by_url', url=next_url),
+            plugin.get_url(action=tags_by_url, url=next_url),
             li,
             isFolder=True
         )
@@ -173,7 +173,7 @@ def list_categories(url):
         li.setProperty("isPlayable", "false")
         xbmcplugin.addDirectoryItem(
             plugin.handle,
-            plugin.get_url(action='posts_by_category', id=category_id),
+            plugin.get_url(action=posts_by_category, id=category_id),
             li,
             isFolder=True
         )
@@ -185,7 +185,7 @@ def list_categories(url):
         li.setProperty("isPlayable", "false")
         xbmcplugin.addDirectoryItem(
             plugin.handle,
-            plugin.get_url(action='categories_by_url', url=next_url),
+            plugin.get_url(action=categories_by_url, url=next_url),
             li,
             isFolder=True
         )
@@ -240,37 +240,37 @@ def edit_url(url, new_params):
 def root(params):
     xbmcplugin.addDirectoryItem(
         plugin.handle,
-        plugin.get_url(action='all_posts'),
+        plugin.get_url(action=all_posts),
         xbmcgui.ListItem(Language.documentations),
         isFolder=True
     )
     xbmcplugin.addDirectoryItem(
         plugin.handle,
-        plugin.get_url(action='all_tags'),
+        plugin.get_url(action=all_tags),
         xbmcgui.ListItem(Language.tags),
         isFolder=True
     )
     xbmcplugin.addDirectoryItem(
         plugin.handle,
-        plugin.get_url(action='all_categories'),
+        plugin.get_url(action=all_categories),
         xbmcgui.ListItem(Language.categories),
         isFolder=True
     )
     xbmcplugin.addDirectoryItem(
         plugin.handle,
-        plugin.get_url(action='search_posts'),
+        plugin.get_url(action=search_posts),
         xbmcgui.ListItem(Language.search_documentations),
         isFolder=True
     )
     xbmcplugin.addDirectoryItem(
         plugin.handle,
-        plugin.get_url(action='search_tags'),
+        plugin.get_url(action=search_tags),
         xbmcgui.ListItem(Language.search_tags),
         isFolder=True
     )
     xbmcplugin.addDirectoryItem(
         plugin.handle,
-        plugin.get_url(action='search_categories'),
+        plugin.get_url(action=search_categories),
         xbmcgui.ListItem(Language.search_categories),
         isFolder=True
     )
@@ -307,7 +307,7 @@ def list_video_playlist(params):
         })
         xbmcplugin.addDirectoryItem(
             plugin.handle,
-            plugin.get_url(action='play', youtube_id=v.id, name=v.title),
+            plugin.get_url(action=play, youtube_id=v.id, name=v.title),
             li,
             isFolder=False
         )
