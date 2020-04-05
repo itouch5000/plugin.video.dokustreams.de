@@ -1,7 +1,7 @@
 import xbmcaddon
 
 
-__addon__ = xbmcaddon.Addon('plugin.video.dokustreams.de')
+__addon__ = xbmcaddon.Addon()
 
 
 class Language(object):

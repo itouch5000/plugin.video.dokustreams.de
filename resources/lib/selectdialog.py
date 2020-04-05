@@ -3,7 +3,7 @@ import xbmcgui
 
 
 class DialogSelect(xbmcgui.WindowXMLDialog):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
         xbmcgui.WindowXMLDialog.__init__(self)
         self.listing = kwargs.get("listing")
         self.title = kwargs.get("title")
