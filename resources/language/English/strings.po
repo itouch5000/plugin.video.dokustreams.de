@@ -19,10 +19,6 @@ msgctxt "#32002"
 msgid "Next page"
 msgstr ""
 
-msgctxt "#32003"
-msgid "Add to Bookmarks"
-msgstr ""
-
 msgctxt "#32004"
 msgid "Show tags"
 msgstr ""
@@ -55,10 +51,6 @@ msgctxt "#30011"
 msgid "Search"
 msgstr ""
 
-msgctxt "#30012"
-msgid "Bookmarks"
-msgstr ""
-
 msgctxt "#30013"
 msgid "Select mirror for"
 msgstr ""
@@ -67,16 +59,8 @@ msgctxt "#30014"
 msgid "Search documentations"
 msgstr ""
 
-msgctxt "#30015"
-msgid "Remove from Bookmarks"
-msgstr ""
-
 msgctxt "#30016"
 msgid "Error"
-msgstr ""
-
-msgctxt "#30017"
-msgid "Documentation already in Bookmarks"
 msgstr ""
 
 msgctxt "#30018"
@@ -85,8 +69,4 @@ msgstr ""
 
 msgctxt "#30019"
 msgid "Search categories"
-msgstr ""
-
-msgctxt "#30020"
-msgid "Short documentations"
 msgstr ""
