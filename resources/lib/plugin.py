@@ -97,7 +97,18 @@ def get_url(**params):
     action_val = params.get(action_key)
     if isinstance(action_val, types.FunctionType):
         params[action_key] = action_val.__name__
-    # encode params
+    # encode values if necessary
+    for key, value in params.items():
+        try:
+            key = py2_encode(key)
+        except (AttributeError, UnicodeDecodeError, UnicodeEncodeError):
+            pass
+        try:
+            value = py2_encode(value)
+            params[key] = value
+        except (AttributeError, UnicodeDecodeError, UnicodeEncodeError):
+            pass
+    # url encode params
     query_string = urlencode(params)
     # build plugin url
     url = "plugin://{id}/?{qs}".format(id=addon_id, qs=query_string)
