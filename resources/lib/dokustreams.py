@@ -217,6 +217,7 @@ def edit_url(url, new_params):
     return new_url
 
 
+@plugin.action()
 def root(params):
     xbmcplugin.addDirectoryItem(
         plugin.handle,
@@ -257,6 +258,7 @@ def root(params):
     xbmcplugin.endOfDirectory(plugin.handle)
 
 
+@plugin.action()
 def all_posts(params):
     url = build_url('posts')
     list_videos(url)
@@ -270,6 +272,7 @@ def parse_post(post_id):
     return parser
 
 
+@plugin.action()
 def list_video_playlist(params):
     _id = params.get("id")
     parser = parse_post(_id)
@@ -294,6 +297,7 @@ def list_video_playlist(params):
     xbmcplugin.endOfDirectory(plugin.handle)
 
 
+@plugin.action()
 def list_playlist(params):
     _id = params.get("id")
     parser = parse_post(_id)
@@ -309,16 +313,19 @@ def list_playlist(params):
     xbmcplugin.endOfDirectory(plugin.handle)
 
 
+@plugin.action()
 def all_tags(params):
     url = build_url('tags')
     list_tags(url)
 
 
+@plugin.action()
 def all_categories(params):
     url = build_url('categories')
     list_categories(url)
 
 
+@plugin.action()
 def search_posts(params):
     dialog = xbmcgui.Dialog()
     query = dialog.input(Language.search_documentations)
@@ -329,6 +336,7 @@ def search_posts(params):
     list_videos(url)
 
 
+@plugin.action()
 def search_tags(params):
     dialog = xbmcgui.Dialog()
     query = dialog.input(Language.search_tags)
@@ -339,6 +347,7 @@ def search_tags(params):
     list_tags(url)
 
 
+@plugin.action()
 def search_categories(params):
     dialog = xbmcgui.Dialog()
     query = dialog.input(Language.search_categories)
@@ -349,45 +358,53 @@ def search_categories(params):
     list_categories(url)
 
 
+@plugin.action()
 def posts_by_url(params):
     url = params.get("url")
     list_videos(url)
 
 
+@plugin.action()
 def tags_by_url(params):
     url = params.get("url")
     list_tags(url)
 
 
+@plugin.action()
 def categories_by_url(params):
     url = params.get("url")
     list_categories(url)
 
 
+@plugin.action()
 def posts_by_tag(params):
     _id = params.get("id")
     url = build_url('posts', {'tags': _id})
     list_videos(url)
 
 
+@plugin.action()
 def posts_by_category(params):
     _id = params.get("id")
     url = build_url('posts', {'categories': _id})
     list_videos(url)
 
 
+@plugin.action()
 def tags_by_post(params):
     _id = params.get("id")
     url = build_url('tags', {'post': _id})
     list_tags(url)
 
 
+@plugin.action()
 def categories_by_post(params):
     _id = params.get("id")
     url = build_url('categories', {'post': _id})
     list_categories(url)
 
 
+@plugin.action()
 def play(params):
     name = params.get("name")
     youtube_id = params.get('youtube_id')
@@ -419,3 +436,7 @@ def play(params):
 
     li = xbmcgui.ListItem(path=video_url)
     xbmcplugin.setResolvedUrl(plugin.handle, True, li)
+
+
+def main():
+    plugin.run()
