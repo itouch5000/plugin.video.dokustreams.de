@@ -21,17 +21,17 @@ def parse_videos(html):
     videos = []
 
     match = soup.find_all('iframe', {'src': re.compile(REGEX_YT_VIDEO)})
-    for i in match:
+    for index, item in enumerate(match):
         v = Video()
-        v.id = parse_yt_id(i["src"])
-        v.title = i.get("title")
+        v.id = parse_yt_id(item["src"])
+        v.title = item.get("title", "Video {}".format(index + 1))
         videos.append(v)
 
     match = soup.find_all("a", {"class": "yotu-video", "data-videoid": True})
-    for i in match:
+    for index, item in enumerate(match):
         v = Video()
-        v.id = i["data-videoid"]
-        v.title = i.get("data-title")
+        v.id = item["data-videoid"]
+        v.title = item.get("data-title", "Video {}".format(index + 1))
         videos.append(v)
 
     return videos
