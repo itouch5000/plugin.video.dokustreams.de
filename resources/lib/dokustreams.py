@@ -23,18 +23,16 @@ import xbmcgui
 import xbmcplugin
 
 from resources.lib import plugin
+from resources.lib.plugin import py2_encode, py2_decode
 from resources.lib.language import Language
-from resources.lib.settings import get_setting
-from resources.lib.utils import py2_encode, py2_decode
 from resources.lib.selectdialog import DialogSelect
-from resources.lib.logger import Logger
 from resources.lib.parser import Parser
 
 
-logger = Logger(__name__)
+logger = plugin.Logger(__name__)
 
 BASE_URL = 'http://dokustreams.de/wp-json/wp/v2'
-PER_PAGE = get_setting('per_page', int)
+PER_PAGE = plugin.get_setting('per_page', int)
 
 
 def page_from_url(url):
