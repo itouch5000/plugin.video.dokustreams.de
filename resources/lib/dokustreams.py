@@ -282,12 +282,17 @@ def all_posts(params):
     list_videos(url)
 
 
-def list_video_playlist(params):
-    _id = params.get("id")
-    url = build_url('posts', {'include': _id})
+def parse_post(post_id):
+    url = build_url('posts', {'include': post_id})
     i = requests.get(url).json()[0]
     content = i.get('content')['rendered']
     parser = Parser(content).parse()
+    return parser
+
+
+def list_video_playlist(params):
+    _id = params.get("id")
+    parser = parse_post(_id)
 
     for v in parser.videos:
         image = "https://i.ytimg.com/vi/{0}/hqdefault.jpg".format(v.id)
@@ -311,10 +316,7 @@ def list_video_playlist(params):
 
 def list_playlist(params):
     _id = params.get("id")
-    url = build_url('posts', {'include': _id})
-    i = requests.get(url).json()[0]
-    content = i.get('content')['rendered']
-    parser = Parser(content).parse()
+    parser = parse_post(_id)
 
     for p in parser.playlists:
         li = xbmcgui.ListItem(p.title)
