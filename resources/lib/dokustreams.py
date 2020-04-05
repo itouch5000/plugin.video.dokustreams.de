@@ -1,6 +1,5 @@
-import json
-
 import bs4
+import json
 import requests
 
 try:
@@ -29,7 +28,7 @@ from resources.lib.settings import get_setting
 from resources.lib.utils import py2_encode, py2_decode
 from resources.lib.selectdialog import DialogSelect
 from resources.lib.logger import Logger
-from resources.lib.parser import parse_videos
+from resources.lib.parser import Parser
 
 
 logger = Logger(__name__)
@@ -58,7 +57,7 @@ def list_videos(url):
             plot = soup.find('meta', {'itemprop': 'description'})['content']
         except TypeError:
             plot = ""
-        yt_videos = parse_videos(content)
+        parser = Parser(content).parse()
 
         li = xbmcgui.ListItem(title)
         li.setInfo("video", {
@@ -78,7 +77,7 @@ def list_videos(url):
             ),
         ])
 
-        if len(yt_videos) == 0:  # search for mirror
+        if len(parser.videos) == 0 and len(parser.playlists) == 0:  # search for mirror
             li.setProperty("isPlayable", "true")
             xbmcplugin.addDirectoryItem(
                 plugin.handle,
@@ -86,8 +85,8 @@ def list_videos(url):
                 li,
                 isFolder=False
             )
-        elif len(yt_videos) == 1:  # video found
-            v = yt_videos[0]
+        elif len(parser.videos) == 1:  # video found
+            v = parser.videos[0]
             image = "https://i.ytimg.com/vi/{0}/hqdefault.jpg".format(v.id)
 
             li.setArt({
@@ -100,12 +99,20 @@ def list_videos(url):
                 li,
                 isFolder=False
             )
-        else:  # playlist found
-            image = "https://i.ytimg.com/vi/{0}/hqdefault.jpg".format(yt_videos[0].id)  # image of the first video
+        elif len(parser.videos) > 0:  # new playlist type found
+            image = "https://i.ytimg.com/vi/{0}/hqdefault.jpg".format(parser.videos[0].id)  # image of the first video
 
             li.setArt({
                 'thumb': image
             })
+            li.setProperty("isPlayable", "false")
+            xbmcplugin.addDirectoryItem(
+                plugin.handle,
+                plugin.get_url(action="list_video_playlist", id=_id),
+                li,
+                isFolder=True
+            )
+        elif len(parser.playlists) > 0:  # old playlist type found
             li.setProperty("isPlayable", "false")
             xbmcplugin.addDirectoryItem(
                 plugin.handle,
@@ -275,15 +282,14 @@ def all_posts(params):
     list_videos(url)
 
 
-def list_playlist(params):
+def list_video_playlist(params):
     _id = params.get("id")
     url = build_url('posts', {'include': _id})
     i = requests.get(url).json()[0]
     content = i.get('content')['rendered']
+    parser = Parser(content).parse()
 
-    videos = parse_videos(content)
-
-    for v in videos:
+    for v in parser.videos:
         image = "https://i.ytimg.com/vi/{0}/hqdefault.jpg".format(v.id)
 
         li = xbmcgui.ListItem(v.title)
@@ -299,6 +305,25 @@ def list_playlist(params):
             plugin.get_url(action='play', youtube_id=v.id, name=v.title),
             li,
             isFolder=False
+        )
+    xbmcplugin.endOfDirectory(plugin.handle)
+
+
+def list_playlist(params):
+    _id = params.get("id")
+    url = build_url('posts', {'include': _id})
+    i = requests.get(url).json()[0]
+    content = i.get('content')['rendered']
+    parser = Parser(content).parse()
+
+    for p in parser.playlists:
+        li = xbmcgui.ListItem(p.title)
+        li.setProperty("isPlayable", "false")
+        xbmcplugin.addDirectoryItem(
+            plugin.handle,
+            "plugin://plugin.video.youtube/playlist/{0}/".format(p.id),
+            li,
+            isFolder=True
         )
     xbmcplugin.endOfDirectory(plugin.handle)
 
