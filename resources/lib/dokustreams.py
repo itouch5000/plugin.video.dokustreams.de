@@ -86,20 +86,33 @@ def list_videos(url):
                 li,
                 isFolder=False
             )
-        else:  # videos found
-            for v in yt_videos:
-                image = "https://i.ytimg.com/vi/{0}/hqdefault.jpg".format(v.id)
+        elif len(yt_videos) == 1:  # video found
+            v = yt_videos[0]
+            image = "https://i.ytimg.com/vi/{0}/hqdefault.jpg".format(v.id)
 
-                li.setArt({
-                    'thumb': image
-                })
-                li.setProperty("isPlayable", "true")
-                xbmcplugin.addDirectoryItem(
-                    plugin.handle,
-                    plugin.get_url(action="play", youtube_id=v.id, name=title),
-                    li,
-                    isFolder=False
-                )
+            li.setArt({
+                'thumb': image
+            })
+            li.setProperty("isPlayable", "true")
+            xbmcplugin.addDirectoryItem(
+                plugin.handle,
+                plugin.get_url(action="play", youtube_id=v.id, name=title),
+                li,
+                isFolder=False
+            )
+        else:  # playlist found
+            image = "https://i.ytimg.com/vi/{0}/hqdefault.jpg".format(yt_videos[0].id)  # image of the first video
+
+            li.setArt({
+                'thumb': image
+            })
+            li.setProperty("isPlayable", "false")
+            xbmcplugin.addDirectoryItem(
+                plugin.handle,
+                plugin.get_url(action="list_playlist", id=_id),
+                li,
+                isFolder=True
+            )
 
     if len(json_data) == PER_PAGE:
         next_page = page_from_url(url) + 1
@@ -260,6 +273,34 @@ def root(params):
 def all_posts(params):
     url = build_url('posts')
     list_videos(url)
+
+
+def list_playlist(params):
+    _id = params.get("id")
+    url = build_url('posts', {'include': _id})
+    i = requests.get(url).json()[0]
+    content = i.get('content')['rendered']
+
+    videos = parse_videos(content)
+
+    for v in videos:
+        image = "https://i.ytimg.com/vi/{0}/hqdefault.jpg".format(v.id)
+
+        li = xbmcgui.ListItem(v.title)
+        li.setInfo("video", {
+            "title": v.title,
+        })
+        li.setProperty("isPlayable", "true")
+        li.setArt({
+            'thumb': image
+        })
+        xbmcplugin.addDirectoryItem(
+            plugin.handle,
+            plugin.get_url(action='play', youtube_id=v.id, name=v.title),
+            li,
+            isFolder=False
+        )
+    xbmcplugin.endOfDirectory(plugin.handle)
 
 
 def all_tags(params):

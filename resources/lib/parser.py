@@ -8,6 +8,7 @@ REGEX_YT_VIDEO = r"(?:youtube\.com/(?:[^/]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=)|yout
 class Video(object):
     def __init__(self):
         self.id = None
+        self.title = None
 
 
 def parse_yt_id(url):
@@ -21,15 +22,16 @@ def parse_videos(html):
 
     match = soup.find_all('iframe', {'src': re.compile(REGEX_YT_VIDEO)})
     for i in match:
-        url = i["src"]
         v = Video()
-        v.id = parse_yt_id(url)
+        v.id = parse_yt_id(i["src"])
+        v.title = i.get("title")
         videos.append(v)
 
     match = soup.find_all("a", {"class": "yotu-video", "data-videoid": True})
     for i in match:
         v = Video()
         v.id = i["data-videoid"]
+        v.title = i.get("data-title")
         videos.append(v)
 
     return videos

@@ -36,6 +36,8 @@ def run():
 
     if action == "all_posts":
         dokustreams.all_posts(params)
+    if action == "list_playlist":
+        dokustreams.list_playlist(params)
     if action == "all_tags":
         dokustreams.all_tags(params)
     if action == "all_categories":
