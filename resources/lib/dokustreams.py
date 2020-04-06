@@ -4,11 +4,11 @@ import requests
 
 try:
     # python 3
-    from urllib.parse import urlencode, parse_qsl, urlsplit, unquote, quote_plus
+    from urllib.parse import parse_qsl, urlsplit, unquote, quote_plus
 except ImportError:
     # python 2
     from urlparse import parse_qsl, urlsplit
-    from urllib import urlencode, unquote, quote_plus
+    from urllib import unquote, quote_plus
 
 try:
     # python 3
@@ -23,7 +23,7 @@ import xbmcgui
 import xbmcplugin
 
 from resources.lib import plugin
-from resources.lib.plugin import py2_encode, py2_decode
+from resources.lib.plugin import py2_encode, py2_decode, build_query_string
 from resources.lib.language import Language
 from resources.lib.selectdialog import DialogSelect
 from resources.lib.parser import Parser
@@ -202,7 +202,8 @@ def build_url(path, params=None):
     if not params:
         params = dict()
     params.setdefault('per_page', PER_PAGE)
-    url = '{0}/{1}?{2}'.format(BASE_URL, path, urlencode(params))
+    query_string = build_query_string(params)
+    url = '{0}/{1}?{2}'.format(BASE_URL, path, query_string)
     logger.debug("build_url: {0}".format(url))
     return url
 
@@ -211,7 +212,8 @@ def edit_url(url, new_params):
     parsed = urlsplit(url)
     params = dict(parse_qsl(urlsplit(url).query))
     params.update(new_params)
-    new_url = '{0}://{1}{2}?{3}'.format(parsed.scheme, parsed.netloc, parsed.path, urlencode(params))
+    query_string = build_query_string(params)
+    new_url = '{0}://{1}{2}?{3}'.format(parsed.scheme, parsed.netloc, parsed.path, query_string)
     return new_url
 
 

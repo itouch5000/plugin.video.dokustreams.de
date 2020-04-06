@@ -64,7 +64,9 @@ def py2_encode(value):
 
 
 def get_string(string_id):
-    return __addon__.getLocalizedString(string_id)
+    value = __addon__.getLocalizedString(string_id)
+    value = py2_encode(value)
+    return value
 
 
 def get_setting(name, typ=str):
@@ -91,12 +93,7 @@ def get_params(url):
     return params
 
 
-def get_url(**params):
-    # translate action functions to their names
-    action_key = "action"
-    action_val = params.get(action_key)
-    if isinstance(action_val, types.FunctionType):
-        params[action_key] = action_val.__name__
+def build_query_string(params):
     # encode values if necessary
     for key, value in params.items():
         try:
@@ -110,6 +107,16 @@ def get_url(**params):
             pass
     # url encode params
     query_string = urlencode(params)
+    return query_string
+
+
+def get_url(**params):
+    # translate action functions to their names
+    action_key = "action"
+    action_val = params.get(action_key)
+    if isinstance(action_val, types.FunctionType):
+        params[action_key] = action_val.__name__
+    query_string = build_query_string(params)
     # build plugin url
     url = "plugin://{id}/?{qs}".format(id=addon_id, qs=query_string)
     return url
