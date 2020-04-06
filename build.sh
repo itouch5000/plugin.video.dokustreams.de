@@ -1,8 +1,8 @@
 #!/bin/sh
 
-FILENAME="plugin.video.dokustreams.de.zip"
-
 set -f  # disable glob
+
+DIRNAME=$(basename $(pwd))
 
 IGNORE_FILES=(
     'build.sh'
@@ -16,8 +16,10 @@ IGNORE_PATHS=(
     './venv/*'
     './tests/*'
     '*/__pycache__/*'
+    "./${DIRNAME}/*"
 )
 
+# build ignore options
 OPTIONS=()
 for IGNORE_FILE in ${IGNORE_FILES[*]}
 do
@@ -29,4 +31,13 @@ do
 done
 OPTIONS=${OPTIONS[*]}
 
-find . -type f ${OPTIONS} -print | zip "$FILENAME" -@
+# copy files to subdir
+rm -fr "${DIRNAME}"
+mkdir "${DIRNAME}"
+find . -type f ${OPTIONS} -exec cp --parents "{}" ${DIRNAME} \;
+
+# zip subdir
+zip -r "${DIRNAME}.zip" "${DIRNAME}"
+
+# remove subdir
+rm -fr "${DIRNAME}"
