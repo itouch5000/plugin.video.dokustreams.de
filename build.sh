@@ -2,21 +2,22 @@
 
 set -f  # disable glob
 
-DIRNAME=$(basename $(pwd))
+DIRPATH=$(pwd)
+DIRNAME=$(basename ${DIRPATH})
 
 IGNORE_FILES=(
-    'build.sh'
-    '.gitignore'
-    'requirements.txt'
-    '*.pyc'
+    "build.sh"
+    ".gitignore"
+    "requirements.txt"
+    "*.pyc"
+    "${DIRNAME}.zip"
 )
 IGNORE_PATHS=(
-    './.git/*'
-    './.idea/*'
-    './venv/*'
-    './tests/*'
-    '*/__pycache__/*'
-    "./${DIRNAME}/*"
+    "./.git/*"
+    "./.idea/*"
+    "./venv/*"
+    "./tests/*"
+    "*/__pycache__/*"
 )
 
 # build ignore options
@@ -27,17 +28,18 @@ do
 done
 for IGNORE_PATH in ${IGNORE_PATHS[*]}
 do
-    OPTIONS+=("-not -path $IGNORE_PATH")
+    OPTIONS+=("-not -path ${IGNORE_PATH}")
 done
 OPTIONS=${OPTIONS[*]}
 
 # copy files to subdir
-rm -fr "${DIRNAME}"
-mkdir "${DIRNAME}"
-find . -type f ${OPTIONS} -exec cp --parents "{}" ${DIRNAME} \;
+TEMPDIR=$(mktemp -d)
+mkdir "${TEMPDIR}/${DIRNAME}"
+find . -type f ${OPTIONS} -exec cp --parents "{}" "${TEMPDIR}/${DIRNAME}" \;
 
 # zip subdir
-zip -r "${DIRNAME}.zip" "${DIRNAME}"
+cd "${TEMPDIR}"
+zip -r "${DIRPATH}/${DIRNAME}.zip" "${DIRNAME}"
 
-# remove subdir
-rm -fr "${DIRNAME}"
+# remove temp dir
+rm -fr "${TEMPDIR}"
