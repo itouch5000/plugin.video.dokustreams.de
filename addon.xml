@@ -14,9 +14,14 @@
     <extension point="xbmc.addon.metadata">
         <platform>all</platform>
         <summary lang="en">View documentation and reports online</summary>
-        <description lang="en">Watch documentaries, reports, interviews and discussion programmes online for free.</description>
         <summary lang="de">Dokumentationen und Reportagen online schauen</summary>
+        <description lang="en">Watch documentaries, reports, interviews and discussion programmes online for free.</description>
 		<description lang="de">Dokumentationen, Reportagen, Interviews und Diskussionssendungen kostenlos online schauen.</description>
+        <source>https://github.com/itouch5000/plugin.video.dokustreams.de</source>
+        <forum>https://www.kodinerds.net/index.php/Thread/59536-Release-Dokustreams-de/</forum>
         <license>GPL 2.0</license>
+        <assets>
+            <icon>icon.png</icon>
+        </assets>
     </extension>
 </addon>
