@@ -10,7 +10,7 @@ IGNORE_FILES=(
     ".gitignore"
     "requirements.txt"
     "*.pyc"
-    "${DIRNAME}.zip"
+    "${DIRNAME}*.zip"
 )
 IGNORE_PATHS=(
     "./.git/*"
@@ -37,8 +37,14 @@ TEMPDIR=$(mktemp -d)
 mkdir "${TEMPDIR}/${DIRNAME}"
 find . -type f ${OPTIONS} -exec cp --parents "{}" "${TEMPDIR}/${DIRNAME}" \;
 
-# zip subdir
 cd "${TEMPDIR}"
+
+# create zip for Kodi 19
+zip -r "${DIRPATH}/${DIRNAME}+matrix.zip" "${DIRNAME}"
+
+# create zip for Kodi 17/18
+sed -i 's|+matrix||g' "${DIRNAME}/addon.xml"
+sed -i 's|addon="xbmc.python" version="3.0.0"|addon="xbmc.python" version="2.25.0"|g' "${DIRNAME}/addon.xml"
 zip -r "${DIRPATH}/${DIRNAME}.zip" "${DIRNAME}"
 
 # remove temp dir
