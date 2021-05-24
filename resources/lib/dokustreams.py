@@ -44,7 +44,8 @@ def page_from_url(url):
 def add_next_url(url, action):
     next_page = page_from_url(url) + 1
     next_url = edit_url(url, {'page': next_page})
-    li = xbmcgui.ListItem('[COLOR blue]{0}[/COLOR]'.format(Language.next_page))
+    li = xbmcgui.ListItem()
+    li.setLabel('[COLOR blue]{0}[/COLOR]'.format(Language.next_page))
     xbmcplugin.addDirectoryItem(
         plugin.handle,
         plugin.get_url(action=action, url=next_url),
@@ -69,7 +70,8 @@ def list_videos(url):
             plot = ""
         parser = Parser(content).parse()
 
-        li = xbmcgui.ListItem(title)
+        li = xbmcgui.ListItem()
+        li.setLabel(title)
         li.setInfo("video", {
             "title": title,
             "plot": plot,
@@ -140,7 +142,8 @@ def list_tags(url):
         name = unescape(i.get('name'))
         tag_id = i.get('id')
 
-        li = xbmcgui.ListItem(name)
+        li = xbmcgui.ListItem()
+        li.setLabel(name)
         xbmcplugin.addDirectoryItem(
             plugin.handle,
             plugin.get_url(action=posts_by_tag, id=tag_id),
@@ -158,7 +161,8 @@ def list_categories(url):
         name = unescape(i.get('name'))
         category_id = i.get('id')
 
-        li = xbmcgui.ListItem(name)
+        li = xbmcgui.ListItem()
+        li.setLabel(name)
         xbmcplugin.addDirectoryItem(
             plugin.handle,
             plugin.get_url(action=posts_by_category, id=category_id),
@@ -219,42 +223,60 @@ def edit_url(url, new_params):
 
 @plugin.action()
 def root(params):
+    li = xbmcgui.ListItem()
+    li.setLabel(Language.documentations)
     xbmcplugin.addDirectoryItem(
         plugin.handle,
         plugin.get_url(action=all_posts),
-        xbmcgui.ListItem(Language.documentations),
+        li,
         isFolder=True
     )
+
+    li = xbmcgui.ListItem()
+    li.setLabel(Language.tags)
     xbmcplugin.addDirectoryItem(
         plugin.handle,
         plugin.get_url(action=all_tags),
-        xbmcgui.ListItem(Language.tags),
+        li,
         isFolder=True
     )
+
+    li = xbmcgui.ListItem()
+    li.setLabel(Language.categories)
     xbmcplugin.addDirectoryItem(
         plugin.handle,
         plugin.get_url(action=all_categories),
-        xbmcgui.ListItem(Language.categories),
+        li,
         isFolder=True
     )
+
+    li = xbmcgui.ListItem()
+    li.setLabel(Language.search_documentations)
     xbmcplugin.addDirectoryItem(
         plugin.handle,
         plugin.get_url(action=search_posts),
-        xbmcgui.ListItem(Language.search_documentations),
+        li,
         isFolder=True
     )
+
+    li = xbmcgui.ListItem()
+    li.setLabel(Language.search_tags)
     xbmcplugin.addDirectoryItem(
         plugin.handle,
         plugin.get_url(action=search_tags),
-        xbmcgui.ListItem(Language.search_tags),
+        li,
         isFolder=True
     )
+
+    li = xbmcgui.ListItem()
+    li.setLabel(Language.search_categories)
     xbmcplugin.addDirectoryItem(
         plugin.handle,
         plugin.get_url(action=search_categories),
-        xbmcgui.ListItem(Language.search_categories),
+        li,
         isFolder=True
     )
+
     xbmcplugin.endOfDirectory(plugin.handle)
 
 
@@ -280,7 +302,8 @@ def list_video_playlist(params):
     for v in parser.videos:
         image = "https://i.ytimg.com/vi/{0}/hqdefault.jpg".format(v.id)
 
-        li = xbmcgui.ListItem(v.title)
+        li = xbmcgui.ListItem()
+        li.setLabel(v.title)
         li.setInfo("video", {
             "title": v.title,
         })
@@ -303,7 +326,8 @@ def list_playlist(params):
     parser = parse_post(_id)
 
     for p in parser.playlists:
-        li = xbmcgui.ListItem(p.title)
+        li = xbmcgui.ListItem()
+        li.setLabel(p.title)
         xbmcplugin.addDirectoryItem(
             plugin.handle,
             "plugin://plugin.video.youtube/playlist/{0}/".format(p.id),
@@ -422,9 +446,14 @@ def play(params):
             if media.get('art'):
                 if media['art'].get('thumb'):
                     image = (media['art']['thumb'])
-            listitem = xbmcgui.ListItem(label=label, label2=label2, iconImage=image)
-            listitem.setProperty("path", media["file"])
-            results.append(listitem)
+            li = xbmcgui.ListItem()
+            li.setLabel(label)
+            li.setLabel2(label2)
+            li.setArt({
+                'icon': image
+            })
+            li.setProperty("path", media["file"])
+            results.append(li)
         xbmc.executebuiltin("dialog.Close(busydialog)")
         title = "{0} \"{1}\"".format(Language.select_mirror_for, name)
         dialog = DialogSelect("DialogSelect.xml", "", listing=results, title=title)
@@ -434,7 +463,8 @@ def play(params):
             return
         video_url = result.getProperty("path")
 
-    li = xbmcgui.ListItem(path=video_url)
+    li = xbmcgui.ListItem()
+    li.setPath(video_url)
     xbmcplugin.setResolvedUrl(plugin.handle, True, li)
 
 
