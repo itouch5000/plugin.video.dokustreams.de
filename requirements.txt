@@ -1,2 +1,2 @@
 beautifulsoup4==4.6.2
-html5lib==0.999.0
+html5lib==0.99999999
